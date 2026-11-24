@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build DEB package') {
+            steps {
+                sh '''
+                    docker run --rm \
+                      -v "$WORKSPACE:/workspace" \
+                      -w /workspace \
+                      ubuntu:24.04 \
+                      bash -c '
+                        apt-get update &&
+                        apt-get install -y dpkg &&
+                        dpkg-deb --build \
+                          lab-05-deb-package \
+                          count-files.deb
+                      '
+                '''
+            }
+        }
+
+        stage('Install and execute') {
+            steps {
+                sh '''
+                    docker run --rm \
+                      -v "$WORKSPACE:/workspace" \
+                      ubuntu:24.04 \
+                      bash -c '
+                        apt-get update &&
+                        apt-get install -y bash &&
+                        dpkg -i /workspace/count-files.deb &&
+                        /usr/bin/count-files
+                      '
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Package installed and script executed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline failed. Check the build logs.'
+        }
+    }
+}
