@@ -7,6 +7,6 @@ if [ ! -d "$DIRECTORY" ]; then
     exit 1
 fi
 
-FILE_COUNT=$(find "$DIRECTORY" -type f | wc -l)
+FILE_COUNT=$(find -H "$DIRECTORY" -type f | wc -l | tr -d ' ')
 
 echo "Number of regular files in $DIRECTORY: $FILE_COUNT"

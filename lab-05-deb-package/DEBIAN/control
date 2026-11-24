@@ -1,0 +1,10 @@
+Package: count-files
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: all
+Depends: bash
+Maintainer: Yaroslav <student@example.com>
+Description: Count regular files in /etc
+ A Bash utility that counts regular files in /etc,
+ excluding directories and symbolic links.

@@ -1,0 +1,44 @@
+name: Build RPM and DEB packages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm dpkg-dev
+
+      - name: Prepare RPM build environment
+        run: |
+          mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+          cp lab-02-bash-script/count-files.sh ~/rpmbuild/SOURCES/
+
+      - name: Build RPM package
+        run: |
+          rpmbuild --define "_topdir $HOME/rpmbuild" \
+            -bb lab-04-rpm-package/SPECS/count-files.spec
+
+      - name: Build DEB package
+        run: |
+          dpkg-deb --build lab-05-deb-package
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            ~/rpmbuild/RPMS/**/*.rpm
+            lab-05-deb-package.deb
